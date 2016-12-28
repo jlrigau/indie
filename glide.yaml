@@ -1,0 +1,12 @@
+package: github.com/jlrigau/indie
+import:
+- package: github.com/docker/docker
+  version: 1.13.0-rc4
+- package: github.com/fsouza/go-dockerclient
+- package: github.com/jawher/mow.cli
+- package: gopkg.in/yaml.v2
+testImport:
+- package: github.com/stretchr/testify
+  version: 1.1.4
+  subpackages:
+  - require

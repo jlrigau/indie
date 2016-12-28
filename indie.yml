@@ -1,0 +1,5 @@
+image: golang:latest
+workspace: /go/src/github.com/jlrigau/indie
+environment:
+  - "GOOS=linux"
+  - "GOARCH=amd64"
