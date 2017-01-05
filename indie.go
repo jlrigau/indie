@@ -136,7 +136,12 @@ func configFromFile() Config {
 	indieFile, _ := ioutil.ReadFile(filepath.Join(dir, "indie.yml"))
 
 	var config Config
+
 	yaml.Unmarshal(indieFile, &config)
+
+	if config.Workspace == "" {
+		config.Workspace = "/workspace"
+	}
 
 	return config
 }
