@@ -42,7 +42,15 @@ environment:
 
 ## Build
 
-You can build Indie by using Indie of course.
+You can build Indie by using Indie of course!
+
+Firstly you have to install dependencies with Glide.
+ 
+```shell
+$ indie glide install
+```
+
+And then build the application.
  
 ```shell
 $ indie go build
