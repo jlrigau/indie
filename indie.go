@@ -8,12 +8,18 @@ import (
 	"io/ioutil"
 	"github.com/fsouza/go-dockerclient"
 	"log"
+	"strings"
 )
 
 type Config struct {
 	Image       string
 	Workspace   string
 	Environment [] string
+}
+
+type DockerClient struct {
+	client     *docker.Client
+	authConfig docker.AuthConfiguration
 }
 
 func main() {
@@ -26,8 +32,27 @@ func main() {
 		endpoint = app.String(cli.StringOpt{
 			Name:   "docker-endpoint",
 			Value:  "unix:///var/run/docker.sock",
-			Desc:   "The Docker Host or socket",
 			EnvVar: "DOCKER_HOST",
+			Desc:   "Docker host or socket",
+		})
+
+		registry = app.String(cli.StringOpt{
+			Name:   "registry-host",
+			Value:  "docker.io",
+			EnvVar: "DOCKER_REGISTRY_HOST",
+			Desc:   "Docker registry host",
+		})
+
+		username = app.String(cli.StringOpt{
+			Name:   "username",
+			EnvVar: "DOCKER_USERNAME",
+			Desc:   "Username to log in to a Docker registry",
+		})
+		password = app.String(cli.StringOpt{
+			Name:      "password",
+			EnvVar:    "DOCKER_PASSWORD",
+			Desc:      "Password to log in to a Docker registry",
+			HideValue: true,
 		})
 
 		cmd  = app.StringsArg("CMD", nil, "Command")
@@ -36,19 +61,20 @@ func main() {
 
 	app.Action = func() {
 		config := configFromFile()
-		client := configureDockerClient(*endpoint)
+		dockerClient := configureDockerClient(*endpoint, *username, *password, *registry)
 
-		err := client.PullImage(docker.PullImageOptions{
-			Repository:   config.Image,
-		}, docker.AuthConfiguration{})
+		repositoryWithTag := strings.Split(config.Image, ":")
 
-		if err != nil {
+		if err := dockerClient.client.PullImage(docker.PullImageOptions{
+			Repository: repositoryWithTag[0],
+			Tag:        repositoryWithTag[1],
+		}, dockerClient.authConfig); err != nil {
 			log.Fatal(err)
 		}
 
 		dir, _ := os.Getwd()
 
-		container, err := client.CreateContainer(docker.CreateContainerOptions{
+		container, err := dockerClient.client.CreateContainer(docker.CreateContainerOptions{
 			Name: "indie",
 			Config: &docker.Config{
 				Image:        config.Image,
@@ -72,13 +98,11 @@ func main() {
 			log.Fatal(err)
 		}
 
-		err = client.StartContainer(container.ID, nil)
-
-		if err != nil {
+		if err := dockerClient.client.StartContainer(container.ID, nil); err != nil {
 			log.Fatal(err)
 		}
 
-		err = client.AttachToContainer(docker.AttachToContainerOptions{
+		opts := docker.AttachToContainerOptions{
 			Container:    container.ID,
 			Logs:         true,
 			Stdout:       true,
@@ -89,9 +113,9 @@ func main() {
 			ErrorStream:  os.Stderr,
 			InputStream:  os.Stdin,
 			OutputStream: os.Stdout,
-		})
+		}
 
-		if err != nil {
+		if err := dockerClient.client.AttachToContainer(opts); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -109,7 +133,7 @@ func configFromFile() Config {
 	return config
 }
 
-func configureDockerClient(endpoint string) *docker.Client {
+func configureDockerClient(endpoint string, username string, password string, registry string) *DockerClient {
 	var client *docker.Client
 	var err error
 
@@ -131,5 +155,21 @@ func configureDockerClient(endpoint string) *docker.Client {
 		}
 	}
 
-	return client
+	var authConfig docker.AuthConfiguration
+
+	if len(os.Getenv("DOCKER_USERNAME")) != 0 &&
+		len(os.Getenv("DOCKER_PASSWORD")) != 0 {
+		authConfig = docker.AuthConfiguration{
+			Username:      username,
+			Password:      password,
+			ServerAddress: registry,
+		}
+	} else {
+		authConfig = docker.AuthConfiguration{}
+	}
+
+	return &DockerClient{
+		client:     client,
+		authConfig: authConfig,
+	}
 }
