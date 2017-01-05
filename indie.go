@@ -63,11 +63,19 @@ func main() {
 		config := configFromFile()
 		dockerClient := configureDockerClient(*endpoint, *username, *password, *registry)
 
-		repositoryWithTag := strings.Split(config.Image, ":")
+		repository := config.Image
+		tag := ""
+
+		if strings.Contains(config.Image, ":") {
+			repositoryWithTag := strings.Split(config.Image, ":")
+
+			repository = repositoryWithTag[0]
+			tag = repositoryWithTag[1]
+		}
 
 		if err := dockerClient.client.PullImage(docker.PullImageOptions{
-			Repository: repositoryWithTag[0],
-			Tag:        repositoryWithTag[1],
+			Repository: repository,
+			Tag:        tag,
 		}, dockerClient.authConfig); err != nil {
 			log.Fatal(err)
 		}
