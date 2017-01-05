@@ -1,5 +1,5 @@
-hash: 93127b181faf8072b67f0ba5e79c6c55b1efc1385ba76748a0dee3c9fbe03b09
-updated: 2016-12-29T11:24:07.460571183+01:00
+hash: 2c79b84b7ab46a7e1396677bf2391e8ce8c1c8ad3203aedba2f2155a4159b544
+updated: 2017-01-05T16:21:07.28135133+01:00
 imports:
 - name: github.com/Azure/go-ansiterm
   version: fa152c58bc15761d0200cb75fe958b89a9d4888e
@@ -52,6 +52,8 @@ imports:
   subpackages:
   - libcontainer/system
   - libcontainer/user
+- name: github.com/satori/go.uuid
+  version: 879c5887cd475cd7864858769793b2ceb0d44feb
 - name: github.com/Sirupsen/logrus
   version: 881bee4e20a5d11a6a88a5667c6f292072ac1963
 - name: golang.org/x/net

@@ -9,6 +9,7 @@ import (
 	"github.com/fsouza/go-dockerclient"
 	"log"
 	"strings"
+	"github.com/satori/go.uuid"
 )
 
 type Config struct {
@@ -81,9 +82,10 @@ func main() {
 		}
 
 		dir, _ := os.Getwd()
+		name := "indie-" + uuid.NewV4().String()
 
 		container, err := dockerClient.client.CreateContainer(docker.CreateContainerOptions{
-			Name: "indie",
+			Name: name,
 			Config: &docker.Config{
 				Image:        config.Image,
 				WorkingDir:   config.Workspace,
@@ -98,7 +100,6 @@ func main() {
 			},
 			HostConfig: &docker.HostConfig{
 				Binds:      []string{dir + ":" + config.Workspace},
-				AutoRemove: true,
 			},
 		})
 
@@ -124,6 +125,13 @@ func main() {
 		}
 
 		if err := dockerClient.client.AttachToContainer(opts); err != nil {
+			log.Fatal(err)
+		}
+
+		if err := dockerClient.client.RemoveContainer(docker.RemoveContainerOptions{
+			ID:            container.ID,
+			RemoveVolumes: true,
+		}); err != nil {
 			log.Fatal(err)
 		}
 	}
