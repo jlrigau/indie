@@ -26,7 +26,7 @@ func main() {
 	app := cli.App("indie", "Docker command execution")
 
 	app.Spec = "[OPTIONS] CMD ARG..."
-	app.Version("v version", "indie 0.1.0")
+	app.Version("v version", "indie 0.2.0")
 
 	var (
 		endpoint = app.String(cli.StringOpt{

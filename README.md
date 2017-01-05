@@ -8,7 +8,7 @@ the pattern of build container for your project without having to create a Makef
 Simply download the binary from GitHub and add it to your `/usr/local/bin` directory.
 
 ```shell
-$ curl -L "https://github.com/jlrigau/indie/releases/download/v0.1.0/indie-$(uname -s)-$(uname -m)" -o /usr/local/bin/indie && \
+$ curl -L "https://github.com/jlrigau/indie/releases/download/v0.2.0/indie-$(uname -s)-$(uname -m)" -o /usr/local/bin/indie && \
   chmod +x /usr/local/bin/indie
 ```
 
