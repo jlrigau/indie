@@ -26,7 +26,7 @@ type DockerClient struct {
 func main() {
 	app := cli.App("indie", "Docker command execution")
 
-	app.Spec = "[OPTIONS] CMD ARG..."
+	app.Spec = "[OPTIONS] [-- CMD [ARG...]]"
 	app.Version("v version", "indie 0.3.0")
 
 	var (
@@ -56,8 +56,8 @@ func main() {
 			HideValue: true,
 		})
 
-		cmd  = app.StringsArg("CMD", nil, "Command")
-		args = app.StringArg("ARG", "", "Arguments")
+		cmd  = app.StringArg("CMD", "", "Command")
+		args = app.StringsArg("ARG", nil, "Arguments")
 	)
 
 	app.Action = func() {
@@ -90,7 +90,7 @@ func main() {
 				Image:        config.Image,
 				WorkingDir:   config.Workspace,
 				Env:          config.Environment,
-				Cmd:          append(*cmd, *args),
+				Cmd:          append([]string{*cmd}, *args...),
 				AttachStdout: true,
 				AttachStderr: true,
 				AttachStdin:  true,
