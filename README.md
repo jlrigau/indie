@@ -55,3 +55,9 @@ And then build the application.
 ```shell
 $ indie go build
 ```
+
+## License
+
+This work is published under the MIT license.
+
+Please see the `LICENSE` file for details.
